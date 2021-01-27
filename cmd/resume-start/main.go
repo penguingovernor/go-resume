@@ -1,37 +1,43 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"os/signal"
 )
 
+const (
+	exitCodeSuccess = iota
+	exitCodeFailure
+)
+
 // actualMain is used here to ensure all deferred calls are executed.
 func actualMain(flags cliFlags) int {
-	const (
-		successCode = iota
-		errCode
-	)
-
 	// Open the log file.
 	logFile, err := os.OpenFile(flags.logFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	defer logFile.Close()
 	if err != nil {
 		log.Printf("unable to open log file: %v\n", err)
-
+		return exitCodeFailure
 	}
 
-	// Change to the resumake.io directory.
+	// Create a logger from it.
+	logger := log.New(logFile, "", log.LstdFlags)
+
+	// Save the working directory.
 	pwd, err := os.Getwd()
 	defer os.Chdir(pwd)
 	if err != nil {
-		log.Printf("unable to get workding directory: %v\n", err)
-		return errCode
+		logger.Printf("unable to get workding directory: %v\n", err)
+		return exitCodeFailure
 	}
 
+	// Change to the resumake.io directory.
 	if err := os.Chdir(flags.resumeGitDirectory); err != nil {
-		log.Printf("unable to change into the resumake.io direcotry: %v\n", err)
-		return errCode
+		logger.Printf("unable to change into the resumake.io direcotry: %v\n", err)
+		return exitCodeFailure
 	}
 
 	// Run the build script.
@@ -40,12 +46,11 @@ func actualMain(flags cliFlags) int {
 		npmBuild.Stdout = logFile
 		npmBuild.Stderr = logFile
 
-		log.Println("Building resumake.io, this may take some time...")
+		fmt.Println("Building resumake.io, this may take some time...")
 
 		if err := npmBuild.Run(); err != nil {
-			log.Printf("failed to build resumake.io: %v\n", err)
-			log.Printf("check the log file at :%v\n", flags.logFile)
-			return errCode
+			logger.Printf("failed to build resumake.io: %v\n", err)
+			return exitCodeFailure
 		}
 	}
 
@@ -56,14 +61,14 @@ func actualMain(flags cliFlags) int {
 
 	// Start the command.
 	if err := npmStart.Start(); err != nil {
-		log.Printf("failed to start npm start: %v\n", err)
-		return errCode
+		logger.Printf("failed to start npm start: %v\n", err)
+		return exitCodeFailure
 	}
 
 	// The ports come from here:
 	// https://github.com/saadq/resumake.io/blob/master/contributing.md#project-overview
-	log.Println("Client started at http://localhost:3000")
-	log.Println("Server started at http://localhost:3001")
+	fmt.Println("Client started at http://localhost:3000")
+	fmt.Println("Server started at http://localhost:3001")
 
 	// Setup a trap routine.
 	sigChan := make(chan os.Signal)
@@ -86,8 +91,8 @@ outerFor:
 				// Get the pid incase we can't kill the process.
 				id := npmStart.Process.Pid
 				if err := npmStart.Process.Kill(); err != nil {
-					log.Printf("failed to killed process (PID: %d): %v\n", id, err)
-					return errCode
+					logger.Printf("failed to killed process (PID: %d): %v\n", id, err)
+					return exitCodeFailure
 				}
 
 				// Then continue as normal.
@@ -99,8 +104,8 @@ outerFor:
 			{
 				// Check for any errors and report them.
 				if err != nil {
-					log.Printf("npm start failed to finish: %v\n", err)
-					return errCode
+					logger.Printf("npm start failed to finish: %v\n", err)
+					return exitCodeFailure
 				}
 				// Otherwise continue as normal.
 				break outerFor
@@ -108,7 +113,7 @@ outerFor:
 		}
 	}
 
-	return successCode
+	return exitCodeSuccess
 }
 
 func main() {
@@ -118,5 +123,11 @@ func main() {
 	// Run the application.
 	exitCode := actualMain(flags)
 
+	// Check for errors.
+	if exitCode != exitCodeSuccess {
+		log.Printf("An error occurred. Please check %s for more information\n", flags.logFile)
+	}
+
+	// Then exit.
 	os.Exit(exitCode)
 }
