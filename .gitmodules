@@ -1,0 +1,3 @@
+[submodule "resumake.io"]
+	path = resumake.io
+	url = git@github.com:saadq/resumake.io
