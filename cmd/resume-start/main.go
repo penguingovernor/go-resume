@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"os"
 	"os/exec"
@@ -9,30 +8,14 @@ import (
 )
 
 // actualMain is used here to ensure all deferred calls are executed.
-func actualMain() int {
+func actualMain(flags cliFlags) int {
 	const (
 		successCode = iota
 		errCode
 	)
 
-	// Get the flags.
-	type flags struct {
-		resumakeDotIODir string
-		logFile          string
-		skipBuild        bool
-	}
-
-	var f flags
-	const defaultResumeDir = "./resumake.io"
-	const defaultLogFile = ".resume-start.log"
-
-	flag.StringVar(&f.resumakeDotIODir, "resumake-dir", defaultResumeDir, "the directory where resumake.io resides")
-	flag.StringVar(&f.logFile, "log", defaultLogFile, "the file where resume-start logs too")
-	flag.BoolVar(&f.skipBuild, "skip-build", false, "skip building resumake.io dependencies")
-	flag.Parse()
-
 	// Open the log file.
-	logFile, err := os.OpenFile(f.logFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile(flags.logFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Printf("unable to open log file: %v\n", err)
 
@@ -46,13 +29,13 @@ func actualMain() int {
 		return errCode
 	}
 
-	if err := os.Chdir(f.resumakeDotIODir); err != nil {
+	if err := os.Chdir(flags.resumeGitDirectory); err != nil {
 		log.Printf("unable to change into the resumake.io direcotry: %v\n", err)
 		return errCode
 	}
 
 	// Run the build script.
-	if !f.skipBuild {
+	if !flags.skipBuild {
 		npmBuild := exec.Command("npm", "run", "build")
 		npmBuild.Stdout = logFile
 		npmBuild.Stderr = logFile
@@ -61,7 +44,7 @@ func actualMain() int {
 
 		if err := npmBuild.Run(); err != nil {
 			log.Printf("failed to build resumake.io: %v\n", err)
-			log.Printf("check the log file at :%v\n", f.logFile)
+			log.Printf("check the log file at :%v\n", flags.logFile)
 			return errCode
 		}
 	}
@@ -129,6 +112,11 @@ outerFor:
 }
 
 func main() {
-	exitCode := actualMain()
+	// Get the flags.
+	flags := getFlags()
+
+	// Run the application.
+	exitCode := actualMain(flags)
+
 	os.Exit(exitCode)
 }
