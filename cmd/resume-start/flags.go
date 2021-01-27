@@ -3,7 +3,7 @@ package main
 import "flag"
 
 const deafultResumeGitDirectory = "./resumake.io"
-const defaultLogFile = ".resume-start.log"
+const defaultLogFile = "./.resume-start.log"
 const defaultSkipBuild = false
 const defaultNoClient = false
 
