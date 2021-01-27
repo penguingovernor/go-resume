@@ -5,13 +5,13 @@ import "flag"
 const deafultResumeGitDirectory = "./resumake.io"
 const defaultLogFile = ".resume-start.log"
 const defaultSkipBuild = false
-const defaultServerOnly = false
+const defaultNoClient = false
 
 type cliFlags struct {
 	resumeGitDirectory string
 	logFile            string
 	skipBuild          bool
-	serverOnly         bool
+	noClient           bool
 }
 
 func getFlags() cliFlags {
@@ -19,7 +19,7 @@ func getFlags() cliFlags {
 	flag.StringVar(&f.resumeGitDirectory, "resumake-dir", deafultResumeGitDirectory, "the directory where resumake.io resides")
 	flag.StringVar(&f.logFile, "log", defaultLogFile, "the file where resume-start logs too")
 	flag.BoolVar(&f.skipBuild, "skip-build", defaultSkipBuild, "skip building resumake.io dependencies")
-	flag.BoolVar(&f.serverOnly, "server-only", defaultServerOnly, "only run the resumake.io's server")
+	flag.BoolVar(&f.noClient, "no-client", defaultNoClient, "disable running the client")
 	flag.Parse()
 	return f
 }

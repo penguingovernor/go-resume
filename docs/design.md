@@ -55,12 +55,19 @@ This task is pretty trivial.
 In our programming language, we just spawn a process that executes the instructions as specified by `resumake's` [`contributing.md`](https://github.com/saadq/resumake.io/blob/master/contributing.md).
 
 To build `resumake.io` we need to run `npm run build` and `npm start`.
-Building takes a while so we'll provide an option to the CLI to skip building (`-skip-build`), however by default this will be set to false.
-To also allow for more flexibility we'll also provide a path to the resumake git directory with the `-resumake-dir` flag.
+Building takes a while and only needs to be done once.
+We'll provide an option to the CLI to skip building the frontend (`-skip-build`) with its default value set to false.
+To also allow for more developer flexibility we'll also provide a path to the resumake.io directory with the `-resumake-dir` flag.
+This is needed so that the tool knows where to execute the build instructions.
 
 Additionally the process should be able to handle interrupts gracefully when running the server and client.
 It should return a success (typically 0) exit code when running them.
 If an interrupt is received during the build process it should return a failure exit code (typically 1).
+
+Since the GUI is only potentially used once it makes little sense to run it every time the user needs to tailor a resume.
+Therefore, the `-no-client` flag should exist.
+This option will not run or build the client.
+It follows that it will also adhere to the `-skip-build` flag and have a graceful shutdown properties.
 
 The following command (`resume-start`) will encompass the above design.
 
@@ -68,6 +75,8 @@ The following command (`resume-start`) will encompass the above design.
 Usage of resume-start:
   -log string
         the file where resume-start logs too (default ".resume-start.log")
+  -no-client
+        disable running the client
   -resumake-dir string
         the directory where resumake.io resides (default "./resumake.io")
   -skip-build
