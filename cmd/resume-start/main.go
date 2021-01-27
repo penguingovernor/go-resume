@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
-	"os/signal"
 )
 
 const (
@@ -40,77 +38,32 @@ func actualMain(flags cliFlags) int {
 		return exitCodeFailure
 	}
 
-	// Run the build script.
-	if !flags.skipBuild {
-		npmBuild := exec.Command("npm", "run", "build")
-		npmBuild.Stdout = logFile
-		npmBuild.Stderr = logFile
-
-		fmt.Println("Building resumake.io, this may take some time...")
-
-		if err := npmBuild.Run(); err != nil {
-			logger.Printf("failed to build resumake.io: %v\n", err)
-			return exitCodeFailure
+	// Build our dependencies in an anonymous function.
+	err = func() error {
+		// If the skip build flag is specified then don't build anything.
+		if flags.skipBuild {
+			return nil
 		}
-	}
 
-	// Configure npm start.
-	npmStart := exec.Command("npm", "start")
-	npmStart.Stderr = logFile
-	npmStart.Stdout = logFile
+		// If we're not building the client then only build the server.
+		if flags.noClient {
+			fmt.Println("Building server...")
+			return buildServer(logger)
+		}
 
-	// Start the command.
-	if err := npmStart.Start(); err != nil {
-		logger.Printf("failed to start npm start: %v\n", err)
+		// We must be building both the client and server.
+		fmt.Println("Building client and server concurrently...")
+		return concurentBuildClientSerer(logger)
+	}()
+
+	if err != nil {
+		logger.Printf("build error: %s\n", err)
 		return exitCodeFailure
 	}
 
-	// The ports come from here:
-	// https://github.com/saadq/resumake.io/blob/master/contributing.md#project-overview
-	fmt.Println("Client started at http://localhost:3000")
-	fmt.Println("Server started at http://localhost:3001")
-
-	// Setup a trap routine.
-	sigChan := make(chan os.Signal)
-	doneChan := make(chan error)
-	signal.Notify(sigChan, os.Interrupt, os.Kill)
-
-	// Wait for the command to finish in the background.
-	go func() {
-		doneChan <- npmStart.Wait()
-	}()
-
-	// Run until one of the channels sends a value.
-outerFor:
-	for {
-		select {
-
-		// If we can read from the trap.
-		case <-sigChan:
-			{
-				// Get the pid incase we can't kill the process.
-				id := npmStart.Process.Pid
-				if err := npmStart.Process.Kill(); err != nil {
-					logger.Printf("failed to killed process (PID: %d): %v\n", id, err)
-					return exitCodeFailure
-				}
-
-				// Then continue as normal.
-				break outerFor
-			}
-
-		// If the command finished.
-		case err := <-doneChan:
-			{
-				// Check for any errors and report them.
-				if err != nil {
-					logger.Printf("npm start failed to finish: %v\n", err)
-					return exitCodeFailure
-				}
-				// Otherwise continue as normal.
-				break outerFor
-			}
-		}
+	if err := runClientServer(!flags.noClient, logFile); err != nil {
+		logger.Printf("failed to start: %s\n", err)
+		return exitCodeFailure
 	}
 
 	return exitCodeSuccess
