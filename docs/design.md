@@ -74,7 +74,7 @@ The following command (`resume-start`) will encompass the above design.
 ```
 Usage of resume-start:
   -log string
-        the file where resume-start logs too (default ".resume-start.log")
+        the file where resume-start logs to (default ".resume-start.log")
   -no-client
         disable running the client
   -resumake-dir string

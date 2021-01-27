@@ -17,7 +17,7 @@ type cliFlags struct {
 func getFlags() cliFlags {
 	f := cliFlags{}
 	flag.StringVar(&f.resumeGitDirectory, "resumake-dir", deafultResumeGitDirectory, "the directory where resumake.io resides")
-	flag.StringVar(&f.logFile, "log", defaultLogFile, "the file where resume-start logs too")
+	flag.StringVar(&f.logFile, "log", defaultLogFile, "the file where resume-start logs to")
 	flag.BoolVar(&f.skipBuild, "skip-build", defaultSkipBuild, "skip building resumake.io dependencies")
 	flag.BoolVar(&f.noClient, "no-client", defaultNoClient, "disable running the client")
 	flag.Parse()
