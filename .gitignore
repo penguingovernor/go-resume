@@ -1,0 +1,9 @@
+# Binaries
+/bin/
+/resume-start
+
+# Log Files
+*.log
+
+# IDE files
+.vscode
