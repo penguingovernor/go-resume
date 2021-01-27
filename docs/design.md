@@ -69,7 +69,7 @@ Usage of resume-start:
   -log string
         the file where resume-start logs too (default ".resume-start.log")
   -resumake-dir string
-        the directory where resumake.io resides (default "./src/resumake.io")
+        the directory where resumake.io resides (default "./resumake.io")
   -skip-build
         skip building resumake.io dependencies
 ```
@@ -77,5 +77,5 @@ Usage of resume-start:
 To build `resume-start` it should be as easy as running the following cross-platform shell command:
 
 ```
-go build ./src/go-resume/cmd/resume-start
+go build ./cmd/resume-start
 ```

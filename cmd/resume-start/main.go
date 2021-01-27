@@ -23,7 +23,7 @@ func actualMain() int {
 	}
 
 	var f flags
-	const defaultResumeDir = "./src/resumake.io"
+	const defaultResumeDir = "./resumake.io"
 	const defaultLogFile = ".resume-start.log"
 
 	flag.StringVar(&f.resumakeDotIODir, "resumake-dir", defaultResumeDir, "the directory where resumake.io resides")
