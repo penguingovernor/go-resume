@@ -10,7 +10,7 @@ If you're in the job market you need to have a couple resumes, plural.
 This is because if you scour the internet for job seeking advice, you'll find that one of the many recommendations is to tailor your resume to each job you apply to.
 That's hard.
 
-Having to locate your `.docx` (or `.tex` if you're fancy), edit it (which can be annoying if you're using a word processing suite--speaking from experience), convert it to a `.pdf`, _is a pain_.
+Having to locate your `.docx` (or `.tex` if you're fancy), edit it (which can be annoying if you're using a word processor), and convert it to a `.pdf`, _is a pain_.
 All I should I have to do is just build my base resume once, then edit a small file to produce a resume.
 This is where **_Go Resume_** steps in.
 
