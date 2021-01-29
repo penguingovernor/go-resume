@@ -1,6 +1,7 @@
 # Binaries
 /bin/
 /resume-start
+/resume-tailor
 
 # Log Files
 *.log
