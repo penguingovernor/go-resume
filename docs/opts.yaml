@@ -1,0 +1,7 @@
+header-includes:
+  - |
+    ```{=latex}
+    \let\oldtoc\tableofcontents
+    \renewcommand{\tableofcontents}{\oldtoc\newpage}
+    ```
+codeBlockCaptions: true
