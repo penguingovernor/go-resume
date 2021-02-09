@@ -15,17 +15,10 @@
 1. Clone the repo with `git clone`
 
 ```sh
-git clone https://github.com/penguingovernor/go-resume.git
+git clone --recursive https://github.com/penguingovernor/go-resume.git
 ```
 
-2. Fetch the submodules with `git submodule`
-
-```sh
-git submodule init
-git submodule update
-```
-
-3. Build the commands with `go build`
+2. Build the commands with `go build`
 
 ```sh
 # Builds the resume-start binary
